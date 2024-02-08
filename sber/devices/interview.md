@@ -250,6 +250,34 @@ loki-config.yaml
   5. деплои в k8s кластер и конфигурация helm chart'ов (ingress, pods, services, rs, deployment)
   6. написание пайплайнов, баш скриптов, ansible-playbook
 
-2. ## На чем CI/CD?
+2. ## На чем был CI/CD в проектах?
+Jenkins, GitHub Actions, GitLab
+
+3. ## Какие аналоги HELM ты знаешь?
+  1. Kustomize
+    1. Похож на Dockerfile - kustomization.yaml
+      1. После создания service.yaml + deployment.yaml -> kustomization.yaml кастомизирует их с заданными значениями
+    2. Аналог helm
+    3. Встроен в kubectl (v1.14+):
+      1. kubectl apply -k === применит kustomize-манифесты
+      2. kubectl delete -k === удалит их
+      3. kubectl kustomize соберёт манифесты и выведет на экран
+    4. Не шаблонизирует как helm
+  2. Jsonnet
+    1. Jsonnet - это ЯП и инструмент для генерации JSON и других форматов данных. Он позволяет создавать и управлять структурированными данными с помощью более компактного и выразительного синтаксиса.
+    2. Основан на JSON
+    3. Можно конвертировать в YAML
+    4. Используется с ЯП:
+        1. C
+        2. Python
+        3. Go
+        4. PHP
+        5. Ruby
+    5. Jsonnet может предоставить более гибкий и мощный подход к генерации конфигураций, чем Helm
+
+4. ## 
+
+
+
 
 ## Продолжить "Тех собес Сбер devices 1/2" с 12:13 мин
