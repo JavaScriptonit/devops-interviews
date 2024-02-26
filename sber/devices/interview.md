@@ -941,4 +941,4 @@ https://habr.com/ru/companies/simnetworks/articles/311106/
 ## 14. 
 
 
-## Продолжить запись (Тех собес Сбер devices 2/2) с 30:00
+## Продолжить запись (Тех собес Сбер devices 2/2) с 35:46
