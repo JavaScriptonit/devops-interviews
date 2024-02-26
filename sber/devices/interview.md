@@ -761,25 +761,7 @@ resource "aws_instance" "example2" {
 
 Пример с несколькими дисками, виртуальными машинами, одной сетью и одной подсетью, используя модули:
 
-1. **main.tf** (основной файл конфигурации):
-```hcl
-provider "google" {
-  credentials = file("account.json")
-  project     = "your-project-id"
-  region      = "us-central1"
-}
-
-module "network" {
-  source = "./modules/network"
-}
-
-module "instances" {
-  source = "./modules/instances"
-  network = module.network.network_name
-}
-```
-
-2. **modules/network/main.tf** (модуль для создания сети и подсети):
+1. **network/main.tf** (папка для создания сети и подсети):
 ```hcl
 resource "google_compute_network" "network" {
   name = "my-network"
@@ -796,15 +778,19 @@ output "network_name" {
 }
 ```
 
-3. **modules/instances/main.tf** (модуль для создания виртуальных машин и дисков):
+2. **instances/main.tf** (папка для создания виртуальных машин и дисков):
 ```hcl
+data "google_compute_network" "network" {
+  name = "my-network"
+}
+
 resource "google_compute_instance" "instance" {
   count        = 2
   name         = "instance-${count.index}"
   machine_type = "n1-standard-1"
   zone         = "us-central1-a"
   network_interface {
-    network = var.network
+    network = data.google_compute_network.network.self_link
     subnetwork = google_compute_subnetwork.subnetwork.self_link
   }
 }
@@ -821,14 +807,33 @@ output "instance_names" {
 }
 ```
 
-4. **variables.tf**:
+3. **variables.tf**:
 ```hcl
 variable "network" {
   description = "Name of the network to attach instances to"
 }
 ```
 
-Запуск конфигурации:
+4. **main.tf** (основной файл конфигурации):
+```hcl
+provider "google" {
+  credentials = file("account.json")
+  project     = "your-project-id"
+  region      = "us-central1"
+}
+
+module "network" {
+  source = "./network"
+}
+
+module "instances" {
+  source = "./instances"
+}
+```
+
+Для использования Terraform вместе с Terragrunt, нужно будет также создать конфигурационные файлы Terragrunt для каждой папки. Terragrunt поможет управлять множеством инфраструктурных объектов, предоставляя удобные возможности, такие как DRY подход и управление переменными. 
+
+### Запуск конфигурации:
 
 1. Создать файл `account.json` с вашими учетными данными GCP.
 
@@ -838,16 +843,32 @@ terraform init
 terraform apply
 ```
 
+3. Либо - запустить Terraform с помощью команды `terragrunt apply-all` для применения конфигурации ко всему проекту.
+
 Будут созданы: сеть, подсеть, виртуальные машины и диски в проекте GCP, используя Terraform.
 
 
+## 10.1. Зачем использовать Terragrunt и пояснение к п.10:
+
+Операции в Terraform не проанализируются и есть отдельные методики как это всё разделить.
+И даже при наличии общего ресурса - можно подгружать его через `DATA`, особенно где ты его не меняешь
+То есть нужно это даже не по файлам разнести, а по разным папкам.
+В 1ой папке будет создаваться сетка, а во всех других папках, где создаются вирт машины - сетка будет подтягиваться через `DATA` и позволит избежать копипаста.
+
+Плюс если в проекте создаются более 10 объектов - применять терраформ - это глупое решение и нужно использовать Terragrunt.
+Это враппер, который позволяет за счет более сложной структуры использовать DRY подход.
 
 
+## 12. Что такое DRY подход?
+
+`DRY (Don't Repeat Yourself)` - это принцип программирования и разработки ПО, который подразумевает избегание повторения кода. Суть DRY состоит в том, чтобы каждая часть знаний или логики программы должна иметь единственное, непротиворечивое представление внутри программы. Это помогает уменьшить дублирование кода, облегчает его поддержку и обновление, а также повышает читаемость и понятность кода.
+
+В контексте инфраструктурного кода (например, с использованием Terraform или Terragrunt), применение DRY подхода означает избегание повторения конфигураций и ресурсов. Вместо создания одинаковых частей кода в разных местах, лучше выделить общие ресурсы в отдельные модули или использовать переменные и данные для повторного использования.
+
+Применение DRY подхода в разработке инфраструктуры помогает сделать код более модульным, уменьшить вероятность ошибок, упростить его поддержку и масштабирование.
 
 
-
-
-
+## 13. 
 
 
 
