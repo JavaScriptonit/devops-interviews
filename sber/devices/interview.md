@@ -757,9 +757,88 @@ resource "aws_instance" "example2" {
 В этом случае, повторяющиеся блоки конфигурации для создания инстансов можно вынести в отдельный модуль, чтобы избежать избыточности и улучшить читаемость и управляемость кода.
 
 
+## 10. Как быть если в main.tf создаётся много объектов и они все нужны? Создаётся 1 базовая сеть и 1 подсеть и 100 машин в этой сети.
 
+Пример с несколькими дисками, виртуальными машинами, одной сетью и одной подсетью, используя модули:
 
+1. **main.tf** (основной файл конфигурации):
+```hcl
+provider "google" {
+  credentials = file("account.json")
+  project     = "your-project-id"
+  region      = "us-central1"
+}
 
+module "network" {
+  source = "./modules/network"
+}
+
+module "instances" {
+  source = "./modules/instances"
+  network = module.network.network_name
+}
+```
+
+2. **modules/network/main.tf** (модуль для создания сети и подсети):
+```hcl
+resource "google_compute_network" "network" {
+  name = "my-network"
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "my-subnetwork"
+  network       = google_compute_network.network.self_link
+  ip_cidr_range = "10.0.1.0/24"
+}
+
+output "network_name" {
+  value = google_compute_network.network.name
+}
+```
+
+3. **modules/instances/main.tf** (модуль для создания виртуальных машин и дисков):
+```hcl
+resource "google_compute_instance" "instance" {
+  count        = 2
+  name         = "instance-${count.index}"
+  machine_type = "n1-standard-1"
+  zone         = "us-central1-a"
+  network_interface {
+    network = var.network
+    subnetwork = google_compute_subnetwork.subnetwork.self_link
+  }
+}
+
+resource "google_compute_disk" "disk" {
+  count = 2
+  name = "disk-${count.index}"
+  type = "pd-standard"
+  size = 10
+}
+
+output "instance_names" {
+  value = [google_compute_instance.instance.*.name]
+}
+```
+
+4. **variables.tf**:
+```hcl
+variable "network" {
+  description = "Name of the network to attach instances to"
+}
+```
+
+Запуск конфигурации:
+
+1. Создать файл `account.json` с вашими учетными данными GCP.
+
+2. Выполнить команды:
+```bash
+terraform init
+terraform apply
+```
+
+Будут созданы: сеть, подсеть, виртуальные машины и диски в проекте GCP, используя Terraform.
 
 
 
