@@ -39,11 +39,11 @@ https://www.linkedin.com/in/vitalylobachev/details/experience/ - пример о
 
 Просмотр потребления ресурсов (процессор, память, диск, сеть) на сервере Linux:
 
-1. `top`, `htop` - Просмотр использования процессора
+1. `top`, `htop` - Онлайн просмотр MEMORY и CPU
 
 2. `free -h` - Просмотр использования памяти. 
     1. `lscpu` - информация о процессах
-    2. `ps aux` - инфо о процессах
+    2. `ps aux` - инфо о процессах (PID/USER/MEM/TIME/CPU)
 
 3. `df -h`, `df -T`, `df -i` - Просмотр использования диска
     1. `du -axh --max-depth=1 /var` - folder used memory
