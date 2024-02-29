@@ -139,7 +139,7 @@ sudo tune2fs -L "mylabel" /dev/sdX
 
 Важно помнить, что установка слишком высокого приоритета для процесса может привести к замедлению работы других процессов на системе. Рекомендуется быть осторожным при изменении приоритетов процессов и учитывать потребности других процессов на сервере.
 
-## 8. Символические ссылки и жесткие ссылки. В чем разница?
+## 8. Символические ссылки и жесткие ссылки. В чем разница? (Linux)
 
 Символические ссылки (`symbolic links`) и жесткие ссылки (`hard links`) - это два способа создания ссылок на файлы в UNIX-подобных операционных системах, таких как Linux. Они имеют разные особенности и применения:
 
@@ -163,7 +163,73 @@ sudo tune2fs -L "mylabel" /dev/sdX
 
 `ls -l` - для просмотра информации о ссылках на файлы в столбце links
 
-## 9. 
+## 9. Как ограничить процесс по потребляемой оперативной памяти? (Linux)
+
+1. Ограничение потребления оперативной памяти контейнера `gitlab-runner-bank2` в 250MB:
+
+    **Шаг 1:** Найти ID контейнера `gitlab-runner-bank2` - `docker ps`
+
+    **Шаг 2:** Команда `docker stats gitlab-runner-bank2` чтобы увидеть текущее потребление оперативной памяти
+
+    **Шаг 3:** Установить ограничение на потребление оперативной памяти контейнера `docker update --memory 250m gitlab-runner-bank2`
+
+
+2. Создание процесса в Linux и установки ограничения на его потребление оперативной памяти в 250MB:
+
+    **Шаг 1:** Файл `light_process.sh` для создания процесса:
+    ```bash
+    #!/bin/bash
+
+    while true
+    do
+        echo "Light process is running..."
+        sleep 1000
+    done
+    ```
+
+    **Шаг 2**: Сделайте скрипт исполняемым: `chmod +x light_process.sh`
+
+    **Шаг 3**: Запустите скрипт light_process.sh в фоновом режиме: `./light_process.sh &`
+
+    **Шаг 4**: Найдите PID (идентификатор процесса) запущенного процесса, используя команду ps: `ps aux | grep light_process.sh`
+
+    **Шаг 5**: Установите ограничение на потребление оперативной памяти для процесса, используя утилиту cgroups. Создайте cgroup с именем `memory_limit` и установите ограничение в 250MB:
+    ```
+    sudo mkdir /sys/fs/cgroup/memory/memory_limit
+    echo 250M > /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes
+    echo $$ > /sys/fs/cgroup/memory/memory_limit/tasks
+    ```
+
+    **Шаг 5**: Посмотреть текущий лимит и после его обновления:
+    ```
+    cat /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes 
+    9223372036854771712
+
+    echo 250M > /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes
+
+    cat /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes 
+    262144000
+    ```
+    **Шаг 5**: Добавить PID процесса в созданную группу:
+    ```
+    echo 3327922 > /sys/fs/cgroup/memory/process1/tasks
+    cat /sys/fs/cgroup/memory/memory_limit/tasks
+    3327922
+    3328466
+    3329874
+    ```
+
+## 10. Как 
+
+
+
+
+
+
+
+
+
+
 
 
 
