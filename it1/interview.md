@@ -226,7 +226,7 @@ sudo tune2fs -L "mylabel" /dev/sdX
    - **DNS (Domain Name System)** - это система, которая переводит доменные имена в IP-адреса и наоборот. Основные принципы работы DNS:
      - Когда вы вводите доменное имя в веб-браузере, ваш компьютер отправляет запрос DNS-серверу для получения соответствующего IP-адреса.
      - DNS-серверы содержат базы данных с записями DNS, которые соответствуют доменным именам IP-адресам.
-     - DNS использует иерархическую структуру доменных имен, где домены разделены точками (например, example.com).
+     - DNS использует иерархическую структуру доменных имен, где домены разделены точками (например, sregistry.mts.ru).
      - Различные типы записей DNS включают A (IPv4-адрес), AAAA (IPv6-адрес), CNAME (каноническое имя), MX (почтовый сервер) и другие.
 
 2. **Как настроить DNS**:
@@ -254,23 +254,23 @@ sudo apt install bind9
 
 2. Настройка зоны DNS в файле `/etc/bind/named.conf.local`:
 ```bash
-zone "example.com" {
+zone "sregistry.mts.ru" {
     type master;
-    file "/etc/bind/zones/example.com.zone";
+    file "/etc/bind/zones/sregistry.mts.ru.zone";
 };
 ```
 
-3. Создание файла зоны `/etc/bind/zones/example.com.zone` и добавление записей:
+3. Создание файла зоны `/etc/bind/zones/sregistry.mts.ru.zone` и добавление записей:
 ```bash
 $TTL    604800
-@       IN      SOA     ns1.example.com. admin.example.com. (
+@       IN      SOA     ns1.sregistry.mts.ru. admin.sregistry.mts.ru. (
                 2022010101  ; Serial
                 604800      ; Refresh
                 86400       ; Retry
                 2419200     ; Expire
                 604800 )    ; Negative Cache TTL
 ;
-@       IN      NS      ns1.example.com.
+@       IN      NS      ns1.sregistry.mts.ru.
 @       IN      A       192.168.1.10
 www     IN      A       192.168.1.20
 ```
@@ -298,39 +298,88 @@ www     IN      A       192.168.1.20
 1. **A (IPv4-адрес)**: 
    - Пример записи A: 
      ```
-     example.com. IN A 192.0.2.1
+     sregistry.mts.ru. IN A 192.0.2.1
      ```
-   В данном примере домен example.com связан с IPv4-адресом 192.0.2.1.
+   В данном примере домен sregistry.mts.ru связан с IPv4-адресом 192.0.2.1.
 
 2. **AAAA (IPv6-адрес)**: 
    - Пример записи AAAA: 
      ```
-     example.com. IN AAAA 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+     sregistry.mts.ru. IN AAAA 2001:0db8:85a3:0000:0000:8a2e:0370:7334
      ```
-   В данном примере домен example.com связан с IPv6-адресом 2001:0db8:85a3:0000:0000:8a2e:0370:7334.
+   В данном примере домен sregistry.mts.ru связан с IPv6-адресом 2001:0db8:85a3:0000:0000:8a2e:0370:7334.
 
 3. **CNAME (каноническое имя)**: 
    - Пример записи CNAME: 
      ```
-     www.example.com. IN CNAME example.com.
+     www.sregistry.mts.ru. IN CNAME sregistry.mts.ru.
      ```
-   В данном примере поддомен www.example.com перенаправляется на домен example.com.
+   В данном примере поддомен www.sregistry.mts.ru перенаправляется на домен sregistry.mts.ru.
 
 4. **MX (почтовый сервер)**: 
    - Пример записи MX: 
      ```
-     example.com. IN MX 10 mail.example.com.
+     sregistry.mts.ru. IN MX 10 mail.sregistry.mts.ru.
      ```
-   В данном примере почтовые сообщения для домена example.com будут отправляться на почтовый сервер mail.example.com с приоритетом 10.
+   В данном примере почтовые сообщения для домена sregistry.mts.ru будут отправляться на почтовый сервер mail.sregistry.mts.ru с приоритетом 10.
 
 Каждая запись имеет свой синтаксис и структуру, которая определяет связь между доменным именем и соответствующими IP-адресами или другими серверами.
 
 ## 13. Команды и утилиты чтобы опросить DNS сервер. (DNS)
 
+Существует несколько утилит и команд, которые можно использовать для опроса DNS-сервера и получения информации о доменных записях. Некоторые из наиболее распространенных утилит включают в себя `nslookup`, `dig`, `host` и `nsq`.
 
+1. **nslookup**:
+   - Пример использования:
+     ```
+     nslookup sregistry.mts.ru
+     Name: sregistry.mts.ru
+     Address: 11.215.144.1
+     ```
+   Эта команда позволяет выполнить DNS-запрос для домена sregistry.mts.ru и вывести информацию о соответствующих записях.
 
+2. **host**:
+   - Пример использования:
+     ```
+     host sregistry.mts.ru
+     sregistry.mts.ru has address 11.215.144.1
 
+     host -t MX mail.mtsbank.ru
+     mail.mtsbank.ru is an alias for adns.mail.mtsbank.ru.
+     ```
+   Эта команда позволяет выполнить DNS-запрос для типа записи MX (почтовый сервер) для домена sregistry.mts.ru и вывести информацию о почтовом сервере.
+
+3. **dig** (Domain Information Groper):
+   - Пример использования:
+     ```
+     dig AAAA sregistry.mts.ru
+
+     ; <<>> DiG 9.16.48-Ubuntu <<>> AAAA sregistry.mts.ru
+     ;; global options: +cmd
+     ;; Got answer:
+     ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 60238
+     ;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+     ;; OPT PSEUDOSECTION:
+     ; EDNS: version: 0, flags:; udp: 65494
+     ;; QUESTION SECTION:
+     ;sregistry.mts.ru.              IN      AAAA
+
+     ;; Query time: 0 msec
+     ;; SERVER: 127.0.0.53#53(127.0.0.53)
+     ;; WHEN: Thu Feb 29 21:08:50 MSK 2024
+     ;; MSG SIZE  rcvd: 45
+     ```
+   1. NOERROR - это означает, что запрос был выполнен успешно и не возникло ошибок.
+   2. Ответ: ANSWER: 0 - это означает, что в ответе на запрос не было найдено записей AAAA (IPv6 адресов) для домена sregistry.mts.ru.
+   3. Сервер DNS: SERVER: 127.0.0.53#53(127.0.0.53) - запрос был отправлен на локальный DNS сервер с IP-адресом 127.0.0.53.
+   4. Время выполнения запроса: Query time: 0 msec - запрос был выполнен за очень короткое время.
+   5. Из данного вывода следует, что для домена sregistry.mts.ru отсутствуют записи AAAA (IPv6 адресов). 
+
+Эти утилиты и команды могут быть использованы для проверки доступности DNS-сервера, получения информации о доменных записях, а также для диагностики и анализа проблем с DNS.
+
+## 14. 
 
 
  
-## Продолжить (ИТ1 тех собес 1/2) с 0:19:32
+## Продолжить (ИТ1 тех собес 1/2) с 0:25:34
