@@ -194,14 +194,14 @@ sudo tune2fs -L "mylabel" /dev/sdX
     **Шаг 4**: Найдите PID (идентификатор процесса) запущенного процесса, используя команду ps: `ps aux | grep light_process.sh`
 
     **Шаг 5**: Установите ограничение на потребление оперативной памяти для процесса, используя утилиту cgroups. Создайте cgroup с именем `memory_limit` и установите ограничение в 250MB:
-    ```
+    ```bash
     sudo mkdir /sys/fs/cgroup/memory/memory_limit
     echo 250M > /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes
     echo $$ > /sys/fs/cgroup/memory/memory_limit/tasks
     ```
 
-    **Шаг 5**: Посмотреть текущий лимит и после его обновления:
-    ```
+    **Шаг 6**: Посмотреть текущий лимит и после его обновления:
+    ```bash
     cat /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes 
     9223372036854771712
 
@@ -210,8 +210,8 @@ sudo tune2fs -L "mylabel" /dev/sdX
     cat /sys/fs/cgroup/memory/memory_limit/memory.limit_in_bytes 
     262144000
     ```
-    **Шаг 5**: Добавить PID процесса в созданную группу:
-    ```
+    **Шаг 7**: Добавить PID процесса в созданную группу:
+    ```bash
     echo 3327922 > /sys/fs/cgroup/memory/process1/tasks
     cat /sys/fs/cgroup/memory/memory_limit/tasks
     3327922
@@ -291,7 +291,7 @@ www     IN      A       192.168.1.20
 6. **CAA (Certification Authority Authorization)** - определяет, какие сертификационные органы имеют право выдавать SSL-сертификаты для данного домена.
 7. **SPF (Sender Policy Framework)** - определяет список IP-адресов, которые авторизованы отправлять электронную почту от имени домена.
 
-## 12. Приведи примеры каждого типа записи.(DNS)
+## 12. Приведи примеры каждого типа записи. (DNS)
 
 Примеры записей для типов A, AAAA, CNAME и MX:
 
@@ -340,7 +340,7 @@ www     IN      A       192.168.1.20
 
 2. **host**:
    - Пример использования:
-     ```
+     ```bash
      host sregistry.mts.ru
      sregistry.mts.ru has address 11.215.144.1
 
@@ -351,7 +351,7 @@ www     IN      A       192.168.1.20
 
 3. **dig** (Domain Information Groper):
    - Пример использования:
-     ```
+     ```bash
      dig AAAA sregistry.mts.ru
 
      ; <<>> DiG 9.16.48-Ubuntu <<>> AAAA sregistry.mts.ru
@@ -378,7 +378,29 @@ www     IN      A       192.168.1.20
 
 Эти утилиты и команды могут быть использованы для проверки доступности DNS-сервера, получения информации о доменных записях, а также для диагностики и анализа проблем с DNS.
 
-## 14. 
+## 14. У нас есть директория, у неё права 755. Что это обозначает? (Linux)
+
+Права 755:
+1. (4+2+1=7) - владелец файла имеет права на чтение, запись и выполнение
+2. (4+0+1=5) - группа и остальные пользователи имеют права только на чтение и выполнение
+
+## 15. Что означает "Выполнение" для директории? (Linux)
+
+1. Право на чтение позволяет пользователю получить список содержимого папки. 
+2. Право на запись позволяет создавать и удалять файлы в этой папке. 
+3. Право на исполнение разрешает перейти в эту папку:
+    1. `cd /Users/andreyshabunov/PhpstormProjects/devops-interviews` - перейти в директорию
+    2. `ls -l /Users/andreyshabunov/PhpstormProjects/devops-interviews` - список файлов директории
+
+## 16. 
+
+
+
+
+
+
+
+
 
 
  
