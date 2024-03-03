@@ -74,7 +74,6 @@ https://www.linkedin.com/in/vitalylobachev/details/experience/ - пример о
     3. `iptables -A INPUT -p tcp --dport 22 -m state --state NEW -m limit --limit 3/min -j ACCEPT` - для ограничения скорости
     4. `iptables -A INPUT -j LOG --log-prefix "Dropped Packet: " iptables -A INPUT -j DROP` - логирование всех отброшенных пакетов
 
-
 ## 4. Чем отличается системное от пользовательского времени (процессорное)? (Linux)
 
 1. Пользовательское время — это время, затраченное процессором на выполнение команд, заданных пользовательской программой. 
