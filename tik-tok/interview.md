@@ -229,11 +229,69 @@ $ kubectl run dev-pg-postgresql-client --rm --tty -i --restart='Never' --namespa
 Это руководство поможет вам успешно развернуть и настроить базу данных в Kubernetes.
 
 
-## 6. 
+## 6. Как разворачивал PostgreSQL без k8s? (БД)
 
+Для развертывания PostgreSQL без Kubernetes, но с использованием Docker на сервере Ubuntu, вам потребуется следующий набор шагов:
 
+1) **Установка Docker на сервер Ubuntu:**
 
-## 7. 
+```bash
+$ sudo apt update
+$ sudo apt install docker.io
+$ sudo systemctl start docker
+$ sudo systemctl enable docker
+```
+
+2) **Создание каталога для хранения данных PostgreSQL:**
+
+```bash
+$ mkdir -p /opt/postgresql/data
+```
+
+3) **Создание и настройка файла конфигурации PostgreSQL:**
+
+```bash
+$ touch /opt/postgresql/postgresql.conf
+```
+
+Пример содержимого `postgresql.conf`:
+
+```plaintext
+listen_addresses = 'localhost'
+port = 5432
+max_connections = 100
+```
+
+4) **Запуск контейнера PostgreSQL:**
+
+```bash
+$ sudo docker run -d --name postgresql-container -v /opt/postgresql/data:/var/lib/postgresql/data -v /opt/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 postgres
+```
+
+5) **Подключение к контейнеру PostgreSQL:**
+
+```bash
+$ sudo docker exec -it postgresql-container psql -U postgres
+```
+
+6) **Создание роли и базы данных:**
+
+```sql
+CREATE ROLE qa_user WITH LOGIN ENCRYPTED PASSWORD 'qa-pg-pass';
+CREATE DATABASE qa_db OWNER qa_user;
+```
+
+7) **Подключение к базе данных с новым пользователем:**
+
+```bash
+$ sudo docker exec -it postgresql-container psql -U qa_user -d qa_db
+```
+
+8) **База данных PostgreSQL успешно развернута на сервере Ubuntu с использованием Docker!**
+
+Эти шаги помогут вам развернуть PostgreSQL на сервере Ubuntu при помощи Docker.
+
+## 7. Как разворачивал PostgreSQL без k8s и docker? (БД)
 
 
 
@@ -246,4 +304,4 @@ $ kubectl run dev-pg-postgresql-client --rm --tty -i --restart='Never' --namespa
 
 
 
-## Продолжить (Тех собес с аналогом TikTok) с 00:02:00
+## Продолжить (Тех собес с аналогом TikTok) с 00:13:36
