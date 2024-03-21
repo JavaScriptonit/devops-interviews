@@ -464,16 +464,20 @@ data:
 
 ## 9. Расскажи подробно работу деплоя в k8s кластер при помощи Арго и гитлаба. (k8s)
 
-Для работы деплоя в Kubernetes кластере с использованием Argo и GitLab, мы можем настроить Continuous Delivery pipeline, который автоматизирует процесс развертывания приложения после каждого пуша кода в GitLab. В этом примере мы будем использовать GitLab CI/CD для запуска пайплайна и Argo CD для управления развертыванием в Kubernetes.
+**Деплой в Kubernetes кластер при помощи Argo и GitLab:**
 
-**Шаги настройки:**
+**Шаги для настройки:**
 
-1) **Настройка GitLab:**
+1. **Установка Argo CD:**
 
-- Создайте репозиторий в GitLab, содержащий ваш код приложения.
-- Создайте файл `.gitlab-ci.yml` в корне вашего репозитория для определения CI/CD pipeline.
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
 
-Пример `.gitlab-ci.yml`:
+2. **Создание GitLab CI/CD pipeline:**
+
+Создайте файл `.gitlab-ci.yml` в корне вашего репозитория `portal-ui`:
 
 ```yaml
 stages:
@@ -481,44 +485,74 @@ stages:
 
 deploy:
   stage: deploy
+  image: argoproj/argocd-cli:v2.1.2
   script:
-    - argocd app sync <argo-application-name> --sync-option Prune=true
+    - argocd login <argo-cd-server-url> --username admin --password <argo-cd-initial-password> --insecure
+    - argocd app sync portal-ui --sync-option Prune=true
 ```
 
-2) **Настройка Argo CD:**
+3. **Создание Argo CD приложения:**
 
-- Установите Argo CD в вашем Kubernetes кластере.
-- Создайте приложение Argo CD, которое будет отслеживать ваш репозиторий GitLab.
-
-Пример файла `argo-application.yaml`:
+Создайте файл `argo-application.yaml`:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: <argo-application-name>
+  name: portal-ui
 spec:
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: default
   project: default
   source:
-    repoURL: 'https://gitlab.com/your-repo'
+    repoURL: 'https://gitlab.com/your-repo/portal-ui'
     path: .
     targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
 ```
 
-3) **Рабочий процесс для разработчика:**
+4. **Изменение настроек GitLab:**
 
-- Разработчик пушит код в репозиторий GitLab.
-- GitLab CI/CD запускает пайплайн, который вызывает команду Argo CD для синхронизации приложения.
+Настройте переменные окружения в GitLab для хранения данных для доступа к Argo CD.
 
-После успешного завершения пайплайна в GitLab, изменения из вашего репозитория GitLab будут автоматически развернуты в вашем Kubernetes кластере с помощью Argo CD.
+**Что делает Argo и пример деплоя в Kubernetes кластер без Argo:**
 
-Этот рабочий процесс позволяет разработчикам удобно и быстро разворачивать свое приложение в Kubernetes, обеспечивая автоматизацию и надежность процесса деплоя.
+Argo - это инструмент для управления непрерывной поставкой и развертыванием приложений в Kubernetes. Он позволяет автоматизировать процессы CI/CD и управлять развертыванием приложений в кластере.
+
+Пример деплоя в Kubernetes кластер без Argo:
+- Ручное создание манифестов Kubernetes (Deployment, Service, Ingress и т. д.).
+- Применение манифестов с помощью `kubectl apply -f`.
+
+Отличия при использовании Argo:
+- Автоматизация процесса деплоя приложений в Kubernetes.
+- Возможность управления развертыванием приложений из Git-репозитория.
+- Визуализация состояния и истории развертываний.
+- Встроенные инструменты для управления версиями приложений.
+
+Использование Argo упрощает и автоматизирует процесс развертывания приложений в Kubernetes, делая его более надежным и эффективным.
+
+## 10. 
 
 
-## Продолжить (Тех собес с аналогом TikTok) с 00:13:36
+
+## 11. 
+
+
+
+## 12. 
+
+
+
+## 13. 
+
+
+
+## 14. 
+
+
+
+## 15. 
+
+
+
+## Продолжить (Тех собес с аналогом TikTok) с 00:17:11
