@@ -293,7 +293,67 @@ $ sudo docker exec -it postgresql-container psql -U qa_user -d qa_db
 
 ## 7. Как разворачивал PostgreSQL без k8s и docker? (БД)
 
+Для развертывания PostgreSQL без использования Kubernetes и Docker на сервере Ubuntu, вам потребуется установить PostgreSQL напрямую на сервер. Вот инструкция с шагами и командами:
 
+1) **Установка PostgreSQL на сервер Ubuntu:**
+
+```bash
+$ sudo apt update
+$ sudo apt install postgresql postgresql-contrib
+```
+
+2) **Настройка файла конфигурации PostgreSQL:**
+
+```bash
+$ sudo nano /etc/postgresql/<version>/main/postgresql.conf
+```
+
+Пример настроек в `postgresql.conf`:
+
+```plaintext
+listen_addresses = 'localhost'
+port = 5432
+max_connections = 100
+```
+
+3) **Настройка файлов pg_hba.conf для разрешения подключений:**
+
+```bash
+$ sudo nano /etc/postgresql/<version>/main/pg_hba.conf
+```
+
+Пример настройки в `pg_hba.conf`:
+
+```plaintext
+host    all             all             127.0.0.1/32            md5
+```
+
+4) **Перезапуск PostgreSQL для применения изменений:**
+
+```bash
+$ sudo systemctl restart postgresql
+```
+
+5) **Подключение к PostgreSQL и создание роли и базы данных:**
+
+```bash
+$ sudo -u postgres psql
+```
+
+```sql
+CREATE ROLE qa_user WITH LOGIN ENCRYPTED PASSWORD 'qa-pg-pass';
+CREATE DATABASE qa_db OWNER qa_user;
+```
+
+6) **Подключение к базе данных с новым пользователем:**
+
+```bash
+$ psql -U qa_user -d qa_db
+```
+
+7) **База данных PostgreSQL успешно развернута на сервере Ubuntu без использования Kubernetes и Docker!**
+
+Эти шаги помогут вам установить и настроить PostgreSQL на сервере Ubuntu напрямую, без использования контейнеров или оркестраторов.
 
 ## 8. 
 
