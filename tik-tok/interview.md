@@ -355,9 +355,112 @@ $ psql -U qa_user -d qa_db
 
 Эти шаги помогут вам установить и настроить PostgreSQL на сервере Ubuntu напрямую, без использования контейнеров или оркестраторов.
 
-## 8. 
+## 8. Что еще делал в k8s? Приведи примеры.
 
+В качестве Senior DevOps Engineer работал с Kubernetes, я выполнял следующие задачи и могу похвастаться следующими достижениями:
 
+1) **Горизонтальное масштабирование приложения:**
+
+- **Задача:** Настройка автоматического горизонтального масштабирования для приложения в Kubernetes.
+- **Шаги:**
+  - Создание горизонтального масштабирования для деплоя приложения:
+
+```bash
+$ kubectl autoscale deployment <deployment-name> --cpu-percent=70 --min=3 --max=10
+```
+
+- **Конфигурационный файл для автомасштабирования:**
+
+```yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: <hpa-name>
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: <deployment-name>
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+```
+
+2) **Управление секретами и конфигурациями:**
+
+- **Задача:** Безопасное хранение и использование секретов и конфигураций в Kubernetes.
+- **Шаги:**
+  - Создание секрета для базы данных:
+
+```bash
+$ kubectl create secret generic db-credentials --from-literal=username=db_user --from-literal=password=db_password
+```
+
+- **Использование секрета в Pod:**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: mycontainer
+      image: nginx
+      env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-credentials
+              key: password
+```
+
+3) **Настройка мониторинга и логирования:**
+
+- **Задача:** Настройка мониторинга и сбора логов для кластера Kubernetes.
+- **Шаги:**
+  - Установка Prometheus и Grafana для мониторинга:
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/grafana-prometheus.yaml
+```
+
+- **Настройка сбора логов с помощью Fluentd:**
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+data:
+  fluent.conf: |
+    <source>
+      @type tail
+      path /var/log/containers/*.log
+      pos_file /var/log/fluentd-containers.log.pos
+      tag kubernetes.*
+      read_from_head true
+      format json
+    </source>
+
+    <match kubernetes.**>
+      @type elasticsearch
+      host elasticsearch
+      port 9200
+      logstash_format true
+      logstash_prefix kubernetes
+      include_tag_key true
+      tag_key @log_name
+      flush_interval 5s
+    </match>
+```
+
+Эти примеры сложных задач в Kubernetes для Senior DevOps Engineers позволяют продемонстрировать опыт работы с расширенными функциями и возможностями платформы.
 
 ## 9. 
 
