@@ -355,7 +355,7 @@ $ psql -U qa_user -d qa_db
 
 Эти шаги помогут вам установить и настроить PostgreSQL на сервере Ubuntu напрямую, без использования контейнеров или оркестраторов.
 
-## 8. Что еще делал в k8s? Приведи примеры.
+## 8. Что еще делал в k8s? Приведи примеры. (k8s)
 
 В качестве Senior DevOps Engineer работал с Kubernetes, я выполнял следующие задачи и могу похвастаться следующими достижениями:
 
@@ -462,9 +462,63 @@ data:
 
 Эти примеры сложных задач в Kubernetes для Senior DevOps Engineers позволяют продемонстрировать опыт работы с расширенными функциями и возможностями платформы.
 
-## 9. 
+## 9. Расскажи подробно работу деплоя в k8s кластер при помощи Арго и гитлаба. (k8s)
 
+Для работы деплоя в Kubernetes кластере с использованием Argo и GitLab, мы можем настроить Continuous Delivery pipeline, который автоматизирует процесс развертывания приложения после каждого пуша кода в GitLab. В этом примере мы будем использовать GitLab CI/CD для запуска пайплайна и Argo CD для управления развертыванием в Kubernetes.
 
+**Шаги настройки:**
+
+1) **Настройка GitLab:**
+
+- Создайте репозиторий в GitLab, содержащий ваш код приложения.
+- Создайте файл `.gitlab-ci.yml` в корне вашего репозитория для определения CI/CD pipeline.
+
+Пример `.gitlab-ci.yml`:
+
+```yaml
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - argocd app sync <argo-application-name> --sync-option Prune=true
+```
+
+2) **Настройка Argo CD:**
+
+- Установите Argo CD в вашем Kubernetes кластере.
+- Создайте приложение Argo CD, которое будет отслеживать ваш репозиторий GitLab.
+
+Пример файла `argo-application.yaml`:
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: <argo-application-name>
+spec:
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default
+  project: default
+  source:
+    repoURL: 'https://gitlab.com/your-repo'
+    path: .
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+        - values.yaml
+```
+
+3) **Рабочий процесс для разработчика:**
+
+- Разработчик пушит код в репозиторий GitLab.
+- GitLab CI/CD запускает пайплайн, который вызывает команду Argo CD для синхронизации приложения.
+
+После успешного завершения пайплайна в GitLab, изменения из вашего репозитория GitLab будут автоматически развернуты в вашем Kubernetes кластере с помощью Argo CD.
+
+Этот рабочий процесс позволяет разработчикам удобно и быстро разворачивать свое приложение в Kubernetes, обеспечивая автоматизацию и надежность процесса деплоя.
 
 
 ## Продолжить (Тех собес с аналогом TikTok) с 00:13:36
