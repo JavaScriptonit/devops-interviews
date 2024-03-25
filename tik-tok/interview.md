@@ -700,10 +700,98 @@ provider "yandex" {
 
 3. **Регулярно создавайте резервные копии:** Регулярно создавайте резервные копии файла состояния, чтобы иметь возможность восстановиться в случае необходимости.
 
-Следуя этим best practices, можно уменьшить риск возникновения проблем с файлом состояния и обеспечить безопасную работу с инфраструктурой через Terraform.
+### Если в файле состояния (.tfstate) были внесены изменения вручную, то:
+Рекомендуется исправить это с помощью Terraform, а именно через использование команды `terraform import`.
 
-## 16. 
+Команда `terraform import` позволяет импортировать существующий ресурс в управляемый Terraform состоянием. Это позволит Terraform узнать о существующем ресурсе и начать управлять им, не изменяя его текущего состояния.
 
+Изменение файла состояния (.tfstate) напрямую не рекомендуется, так как это может привести к несоответствиям между фактическим состоянием инфраструктуры и содержимым файла состояния, что может вызвать проблемы при развертывании и управлении инфраструктурой.
+
+Поэтому, если были внесены изменения в файл состояния вручную, рекомендуется использовать команду `terraform import` для корректного импорта существующего ресурса в Terraform и обновления состояния.
+
+## 16. Как была развёрнута Mongo? Это был кластер серверов или на 1ом сервере? (БД)
+
+Для поднятия кластера базы данных MongoDB на нескольких серверах с использованием Docker и настройки репликации с монтированием директорий, вам понадобится следовать следующим шагам:
+
+1. **Создание docker-compose.yaml:**
+
+```yaml
+version: '3'
+
+services:
+  mongodb1:
+    image: mongo
+    container_name: mongodb1
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb1_data:/data/db
+    networks:
+      - mongo-cluster
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  mongodb2:
+    image: mongo
+    container_name: mongodb2
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb2_data:/data/db
+    networks:
+      - mongo-cluster
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+  mongodb3:
+    image: mongo
+    container_name: mongodb3
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb3_data:/data/db
+    networks:
+      - mongo-cluster
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+volumes:
+  mongodb1_data:
+  mongodb2_data:
+  mongodb3_data:
+
+networks:
+  mongo-cluster:
+```
+
+2. **Репликация кластера MongoDB:**
+   Да, MongoDB поддерживает кластеризацию и репликацию данных. Для настройки кластерной репликации MongoDB, вам нужно будет настроить конфигурацию репликации в каждом узле кластера и указать узлы, которые будут участвовать в репликации.
+
+   - Вы можете настроить репликацию с помощью команды `rs.initiate()` для инициализации репликационного набора и добавления узлов в него.
+   - MongoDB также предоставляет механизм автоматического обнаружения и восстановления для обеспечения высокой доступности и отказоустойчивости.
+
+3. **Создание единого пользователя с правами администратора на каждом узле кластера:**
+```
+$ docker exec -it mongodb1 mongo admin --eval "db.createUser({ user: 'admin', pwd: 'password', roles: [ { role: 'root', db: 'admin' } ] })"
+$ docker exec -it mongodb2 mongo admin --eval "db.createUser({ user: 'admin', pwd: 'password', roles: [ { role: 'root', db: 'admin' } ] })"
+$ docker exec -it mongodb3 mongo admin --eval "db.createUser({ user: 'admin', pwd: 'password', roles: [ { role: 'root', db: 'admin' } ] })"
+```
+
+4. Для настройки репликации данных между узлами кластера MongoDB в Docker, нужно настроить репликацию между узлами. Нужно настроить каждый узел как член репликационного набора и указать основной узел (primary) для записи данных, а также вторичные узлы (secondary) для чтения данных командой `rs.initiate()`:
+
+```bash
+$ docker exec -it mongodb1 mongo
+> rs.initiate()
+> rs.add("mongodb2:27017")
+> rs.add("mongodb3:27017")
+```
+
+Это настроит репликацию между узлами `mongodb1`, `mongodb2` и `mongodb3`, и данные будут автоматически синхронизироваться между ними.
+
+Таким образом, после настройки репликации данные будут одинаковыми в каждой базе MongoDB, и изменения данных будут автоматически синхронизироваться между узлами кластера.
 
 ## 17. 
 
