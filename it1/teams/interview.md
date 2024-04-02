@@ -829,7 +829,59 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout client-key.pem -out 
 
 Таким образом, в вашем случае вам потребуется выпустить 10 отдельных серверных сертификатов для каждого домена сервиса, чтобы обеспечить безопасное HTTPS-соединение между клиентами и вашими сервисами в Kubernetes.
 
-## 30. 
+## 30. Серверные серты. Можно ли выпустить 1 серт под 10 ингрессов (10 сервисов) ? (openssl) (k8s)
+
+Можно использовать один wildcard-сертификат для обеспечения HTTPS-соединения для нескольких доменов сервисов. Wildcard-сертификат имеет шаблонное имя, которое соответствует нескольким поддоменам. Например, сертификат для `*.example.com` будет соответствовать `service1.example.com`, `service2.example.com` и т.д.
+
+Вот пример того, как можно создать и использовать wildcard-сертификат в Kubernetes:
+
+1. Создание wildcard-сертификата (например, `*.example.com`):
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout wildcard-key.pem -out wildcard-cert.pem -subj "/CN=*.example.com"
+```
+
+2. Создание секрета Kubernetes из wildcard-сертификата:
+```bash
+kubectl create secret tls wildcard-cert --key=wildcard-key.pem --cert=wildcard-cert.pem
+```
+
+3. Настройка ингресса для использования wildcard-сертификата:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+spec:
+  tls:
+  - hosts:
+    - "*.example.com"
+    secretName: wildcard-cert
+  rules:
+  - host: service1.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: service1
+            port:
+              number: 80
+  - host: service2.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: service2
+            port:
+              number: 80
+```
+
+4. Проверка работоспособности: обратитесь к своим сервисам через HTTPS, используя домены `service1.example.com` и `service2.example.com`. Убедитесь, что соединение устанавливается без ошибок.
+
+Использование wildcard-сертификата позволяет упростить управление сертификатами для нескольких сервисов с разными доменами, но имейте в виду, что это также увеличивает уровень доступа для всех сервисов, использующих этот сертификат.
 
 ## 31. 
 
@@ -838,4 +890,4 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout client-key.pem -out 
 ## 33. 
 
 
-## Продолжить (IT1. Знакомство с командой 1/1) с 00:18:24
+## Продолжить (IT1. Знакомство с командой 1/1) с 00:21:28
