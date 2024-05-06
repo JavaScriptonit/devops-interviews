@@ -149,6 +149,83 @@ spec:
 
 При создании этого пода, Kubernetes будет пытаться разместить его на ноде, которая имеет метку "my-node=selected". Если на ноде с такой меткой нет свободных ресурсов, под будет ожидать, пока такая нода не станет доступной.
 
-## 4. 
+## 4. Какие способы есть чтобы приатачить волюмы к поду / деплойменту?Приведи несколько примеров
 
-## Продолжить собес с 01:55 
+В Kubernetes существует несколько способов прикрепления томов (волюмов) к подам или деплойментам:
+
+1. EmptyDir:
+EmptyDir - это временное хранилище, связанное с жизненным циклом пода. EmptyDir создается при запуске пода и удаляется при его остановке. Пример манифеста пода с использованием EmptyDir:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx:latest
+      volumeMounts:
+        - name: my-volume
+          mountPath: /data
+  volumes:
+    - name: my-volume
+      emptyDir: {}
+```
+
+2. PersistentVolume (PV) и PersistentVolumeClaim (PVC):
+PV и PVC используются для создания постоянных хранилищ в Kubernetes. PV представляет собой независимый объем данных, а PVC запрашивает хранилище и связывается с PV. Пример PVC и манифеста пода с использованием PVC:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx:latest
+      volumeMounts:
+        - name: my-volume
+          mountPath: /data
+  volumes:
+    - name: my-volume
+      persistentVolumeClaim:
+        claimName: my-pvc
+```
+
+3. HostPath:
+HostPath позволяет монтировать локальный путь на хосте в под. Этот метод не рекомендуется для продакшн сред, так как он приводит к привязке пода к конкретному узлу. Пример манифеста пода с использованием HostPath:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx:latest
+      volumeMounts:
+        - name: my-volume
+          mountPath: /data
+  volumes:
+    - name: my-volume
+      hostPath:
+        path: /path/on/host
+```
+
+Это несколько способов прикрепления томов к подам или деплойментам в Kubernetes. Каждый из них имеет свои особенности и подходит для различных сценариев использования.
+
+## Продолжить собес с 03:30 
